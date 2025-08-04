@@ -7,6 +7,44 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 
 export class UserController {
+  cadastro = async (req: Request, res: Response) => {
+    const cadastroSchema = z.object({
+      nome: z.string().min(3).max(50),
+      email: z.string().email(),
+      password: z.string().min(6),
+    });
+
+    try {
+      const data = cadastroSchema.parse(req.body);
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email },
+      });
+
+      if (existingUser) {
+      }
+
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      const user = await prisma.user.create({
+        data: {
+          email: data.email,
+          password: hashedPassword,
+        },
+      });
+
+      return res
+        .status(201)
+        .json({ message: "Usuário criado", userId: user.id });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  };
+
   login = async (req: Request, res: Response) => {
     const loginSchema = z.object({
       email: z.string().email(),

@@ -7,4 +7,6 @@ const userController = new UserController();
 
 userRoute.post("/login", authenticate, userController.login);
 
+userRoute.post("/cadastro", userController.cadastro);
+
 userRoute.post("/refeicao", authenticate, userController.criarRefeicao);
