@@ -6,3 +6,5 @@ export const userRoute = Router();
 const userController = new UserController();
 
 userRoute.post("/login", authenticate, userController.login);
+
+userRoute.post("/refeicao", authenticate, userController.criarRefeicao);

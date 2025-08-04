@@ -48,4 +48,38 @@ export class UserController {
       return res.status(500).json({ error: "Erro interno" });
     }
   };
+
+  criarRefeicao = async (req: Request, res: Response) => {
+    const criarRefeicaoSchema = z.object({
+      nome: z.string().min(3),
+      descricao: z.string().min(10),
+      dataHora: z.coerce.date(),
+      dentroDaDieta: z.boolean(),
+      calorias: z.number().positive(),
+      dietaId: z.string().uuid().optional(),
+    });
+
+    try {
+      const { nome, descricao, dataHora, dentroDaDieta, calorias } =
+        criarRefeicaoSchema.parse(req.body);
+      const refeicao = await prisma.refeicao.create({
+        data: {
+          nome,
+          descricao,
+          dataHora,
+          dentroDaDieta,
+          calorias,
+          dietaId: req.body.dietaId || null,
+          usuarioId: req.usuarioId,
+        },
+      });
+      return res.status(201).json(refeicao);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos" });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  };
 }

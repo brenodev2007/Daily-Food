@@ -36,36 +36,25 @@ model Dieta {
   caloriasDiarias Float
   usuarioId       String
   usuario         User     @relation(fields: [usuarioId], references: [id])
-  foods           Food[]
-
+  refeicoes       Refeicao[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@map("dieta")
 }
 
-model Food {
-  id        String   @id @default(uuid())
-  nome      String
-  descricao String
-  calorias  Float
-  dietaId   String?
-  dieta     Dieta?   @relation(fields: [dietaId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("food")
-}
 
 model Refeicao {
   id            String   @id @default(cuid())
   nome          String
   descricao     String
   dataHora      DateTime
+  calorias      Float
   dentroDaDieta Boolean
   usuarioId     String
   usuario       User     @relation(fields: [usuarioId], references: [id])
+  dietaId       String?
+  dieta         Dieta?   @relation(fields: [dietaId], references: [id])
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
