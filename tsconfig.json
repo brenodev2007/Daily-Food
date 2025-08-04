@@ -1,18 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "lib": ["ES2023"],
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/@types"],
-
-    "module": "node16",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-
     "strict": true,
+    "esModuleInterop": true,
+    "module": "node16",
+    "target": "es2022",
     "skipLibCheck": true
-  }
+  },
+  "include": ["src"]
 }
