@@ -1,5 +1,6 @@
 import { Router } from "express";
+import { userRoute } from "@/routes/User-routes";
 
 export const routes = Router();
 
-routes.use("/task");
+routes.use("/client", userRoute);
