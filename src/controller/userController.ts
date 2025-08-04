@@ -120,4 +120,119 @@ export class UserController {
       return res.status(500).json({ error: "Erro interno" });
     }
   };
+
+  listarRefeicoes = async (req: Request, res: Response) => {
+    try {
+      const refeicoes = await prisma.refeicao.findMany({
+        where: { usuarioId: req.usuarioId },
+        orderBy: { dataHora: "desc" },
+      });
+
+      return res.json(refeicoes);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  };
+
+  verRefeicao = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    try {
+      const refeicao = await prisma.refeicao.findUnique({
+        where: { id, usuarioId: req.usuarioId },
+      });
+
+      if (!refeicao) {
+        return res.status(404).json({ error: "Refeição não encontrada" });
+      }
+
+      return res.json(refeicao);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  };
+
+  editarRefeicao = async (req: Request, res: Response) => {
+    const schema = z.object({
+      nome: z.string(),
+      descricao: z.string(),
+      dataHora: z.coerce.date(),
+      dentroDaDieta: z.boolean(),
+      calorias: z.number().positive(),
+    });
+
+    try {
+      const { id } = req.params;
+      const data = schema.parse(req.body);
+
+      const refeicao = await prisma.refeicao.findFirst({
+        where: { id, usuarioId: req.usuarioId },
+      });
+
+      if (!refeicao) {
+        return res.status(404).json({ message: "Refeição não encontrada" });
+      }
+
+      const atualizada = await prisma.refeicao.update({
+        where: { id },
+        data,
+      });
+
+      return res.json(atualizada);
+    } catch (error) {
+      return res.status(400).json({ message: "Erro ao editar refeição" });
+    }
+  };
+
+  deletarRefeicao = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+      const refeicao = await prisma.refeicao.findFirst({
+        where: { id, usuarioId: req.usuarioId },
+      });
+
+      if (!refeicao) {
+        return res.status(404).json({ message: "Refeição não encontrada" });
+      }
+
+      await prisma.refeicao.delete({
+        where: { id },
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  };
+
+  exibirMetricas = async (req: Request, res: Response) => {
+    const usuarioId = req.usuarioId;
+
+    const [total, dentro, fora, refeicoes] = await Promise.all([
+      prisma.refeicao.count({ where: { usuarioId } }),
+      prisma.refeicao.count({ where: { usuarioId, dentroDaDieta: true } }),
+      prisma.refeicao.count({ where: { usuarioId, dentroDaDieta: false } }),
+      prisma.refeicao.findMany({
+        where: { usuarioId },
+        orderBy: { dataHora: "asc" },
+      }),
+    ]);
+
+    let melhorSequencia = 0;
+    let atual = 0;
+
+    for (const r of refeicoes) {
+      if (r.dentroDaDieta) {
+        atual++;
+        if (atual > melhorSequencia) melhorSequencia = atual;
+      } else {
+        atual = 0;
+      }
+    }
+
+    return res.json({ total, dentro, fora, melhorSequencia });
+  };
 }
