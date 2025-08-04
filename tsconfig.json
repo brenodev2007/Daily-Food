@@ -6,7 +6,7 @@
     "paths": {
       "@/*": ["*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/@types"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
 
     "module": "node16",
     "esModuleInterop": true,
