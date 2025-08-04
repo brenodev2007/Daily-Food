@@ -28,8 +28,9 @@ export class UserController {
 
       const user = await prisma.user.create({
         data: {
+          nome: data.nome,
           email: data.email,
-          password: hashedPassword,
+          senha: hashedPassword,
         },
       });
 
@@ -61,7 +62,7 @@ export class UserController {
         return res.status(401).json({ error: "Email ou senha inválidos" });
       }
       //vai comparar a senhas
-      const passwordMatch = await bcrypt.compare(password, user.password);
+      const passwordMatch = await bcrypt.compare(password, user.senha);
 
       if (!passwordMatch) {
         return res.status(401).json({ error: "Email ou senha inválidos" });
@@ -69,7 +70,7 @@ export class UserController {
       const token = jwt.sign(
         {
           email: user.email,
-          role: user.role,
+          passord: user.senha,
         },
         authConfig.jwt.secret,
         {
@@ -108,7 +109,7 @@ export class UserController {
           dentroDaDieta,
           calorias,
           dietaId: req.body.dietaId || null,
-          usuarioId: req.usuarioId,
+          usuarioId: (req as any).usuarioId,
         },
       });
       return res.status(201).json(refeicao);
@@ -124,7 +125,7 @@ export class UserController {
   listarRefeicoes = async (req: Request, res: Response) => {
     try {
       const refeicoes = await prisma.refeicao.findMany({
-        where: { usuarioId: req.usuarioId },
+        where: { usuarioId: (req as any).usuarioId },
         orderBy: { dataHora: "desc" },
       });
 
@@ -139,7 +140,7 @@ export class UserController {
     const id = req.params.id;
     try {
       const refeicao = await prisma.refeicao.findUnique({
-        where: { id, usuarioId: req.usuarioId },
+        where: { id, usuarioId: (req as any).usuarioId },
       });
 
       if (!refeicao) {
@@ -167,7 +168,7 @@ export class UserController {
       const data = schema.parse(req.body);
 
       const refeicao = await prisma.refeicao.findFirst({
-        where: { id, usuarioId: req.usuarioId },
+        where: { id, usuarioId: (req as any).usuarioId },
       });
 
       if (!refeicao) {
@@ -190,7 +191,7 @@ export class UserController {
 
     try {
       const refeicao = await prisma.refeicao.findFirst({
-        where: { id, usuarioId: req.usuarioId },
+        where: { id, usuarioId: (req as any).usuarioId },
       });
 
       if (!refeicao) {
@@ -209,7 +210,7 @@ export class UserController {
   };
 
   exibirMetricas = async (req: Request, res: Response) => {
-    const usuarioId = req.usuarioId;
+    const usuarioId = (req as any).usuarioId;
 
     const [total, dentro, fora, refeicoes] = await Promise.all([
       prisma.refeicao.count({ where: { usuarioId } }),
